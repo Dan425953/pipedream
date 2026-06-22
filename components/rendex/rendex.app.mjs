@@ -111,6 +111,44 @@ export default {
       description: "Pagination cursor returned as `nextCursor` by a previous response.",
       optional: true,
     },
+    extractFormat: {
+      type: "string",
+      label: "Extract Format",
+      description: "Format of the extracted content.",
+      optional: true,
+      default: "markdown",
+      options: [
+        "markdown",
+        "json",
+        "html",
+      ],
+    },
+    expiresIn: {
+      type: "integer",
+      label: "Expires In (seconds)",
+      description: "How long the hosted render link stays valid (3600–2592000). Defaults to 30 days.",
+      optional: true,
+      min: 3600,
+      max: 2592000,
+    },
+    width: {
+      type: "integer",
+      label: "Width",
+      description: "Viewport width in pixels.",
+      optional: true,
+    },
+    height: {
+      type: "integer",
+      label: "Height",
+      description: "Viewport height in pixels.",
+      optional: true,
+    },
+    fullPage: {
+      type: "boolean",
+      label: "Full Page",
+      description: "Capture the entire scrollable page instead of just the viewport.",
+      optional: true,
+    },
   },
   methods: {
     _baseUrl() {
@@ -189,6 +227,20 @@ export default {
       return this._makeRequest({
         method: "POST",
         path: `/v1/watches/${watchId}/run`,
+        ...opts,
+      });
+    },
+    extract(opts = {}) {
+      return this._makeRequest({
+        method: "POST",
+        path: "/v1/extract",
+        ...opts,
+      });
+    },
+    createRenderLink(opts = {}) {
+      return this._makeRequest({
+        method: "POST",
+        path: "/v1/render/link",
         ...opts,
       });
     },
