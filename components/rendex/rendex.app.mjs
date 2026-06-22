@@ -29,6 +29,88 @@ export default {
         "pdf",
       ],
     },
+    watchId: {
+      type: "string",
+      label: "Watch",
+      description: "The watch to act on.",
+      async options() {
+        const { data } = await this.listWatches({
+          params: {
+            status: "all",
+            limit: 100,
+          },
+        });
+        return (data?.items ?? []).map((watch) => ({
+          label: watch.name
+            ? `${watch.name} (${watch.url})`
+            : watch.url,
+          value: watch.id,
+        }));
+      },
+    },
+    name: {
+      type: "string",
+      label: "Name",
+      description: "A human-friendly label for the watch.",
+      optional: true,
+    },
+    intervalMinutes: {
+      type: "integer",
+      label: "Interval (minutes)",
+      description: "Minutes between automatic checks. Per-plan floors apply (Free 1440, Starter 180, Pro 30, Enterprise 5).",
+      optional: true,
+      min: 5,
+      max: 43200,
+    },
+    diffMode: {
+      type: "string",
+      label: "Diff Mode",
+      description: "How a change is detected: `visual` (pixel diff), `text` (extracted text), or `both`.",
+      optional: true,
+      options: [
+        "visual",
+        "text",
+        "both",
+      ],
+    },
+    threshold: {
+      type: "string",
+      label: "Threshold",
+      description: "Fraction of the page (between `0` and `1`) that must change to count as a change. Defaults to `0.01`.",
+      optional: true,
+    },
+    webhookUrl: {
+      type: "string",
+      label: "Webhook URL",
+      description: "URL that receives an HMAC-signed POST when a change is detected. Requires a Starter plan or higher.",
+      optional: true,
+    },
+    notifyEmail: {
+      type: "string",
+      label: "Notify Email",
+      description: "Email to alert on a change. Must match the email on your Rendex account.",
+      optional: true,
+    },
+    paused: {
+      type: "boolean",
+      label: "Paused",
+      description: "When `true`, the watch is created/left paused and is not scheduled (no credits charged).",
+      optional: true,
+    },
+    limit: {
+      type: "integer",
+      label: "Limit",
+      description: "Maximum number of items to return (1–100).",
+      optional: true,
+      min: 1,
+      max: 100,
+    },
+    cursor: {
+      type: "string",
+      label: "Cursor",
+      description: "Pagination cursor returned as `nextCursor` by a previous response.",
+      optional: true,
+    },
   },
   methods: {
     _baseUrl() {
@@ -61,6 +143,52 @@ export default {
       return this._makeRequest({
         method: "POST",
         path: "/v1/screenshot/json",
+        ...opts,
+      });
+    },
+    createWatch(opts = {}) {
+      return this._makeRequest({
+        method: "POST",
+        path: "/v1/watches",
+        ...opts,
+      });
+    },
+    listWatches(opts = {}) {
+      return this._makeRequest({
+        path: "/v1/watches",
+        ...opts,
+      });
+    },
+    getWatch(watchId, opts = {}) {
+      return this._makeRequest({
+        path: `/v1/watches/${watchId}`,
+        ...opts,
+      });
+    },
+    listRuns(watchId, opts = {}) {
+      return this._makeRequest({
+        path: `/v1/watches/${watchId}/runs`,
+        ...opts,
+      });
+    },
+    updateWatch(watchId, opts = {}) {
+      return this._makeRequest({
+        method: "PATCH",
+        path: `/v1/watches/${watchId}`,
+        ...opts,
+      });
+    },
+    deleteWatch(watchId, opts = {}) {
+      return this._makeRequest({
+        method: "DELETE",
+        path: `/v1/watches/${watchId}`,
+        ...opts,
+      });
+    },
+    runWatch(watchId, opts = {}) {
+      return this._makeRequest({
+        method: "POST",
+        path: `/v1/watches/${watchId}/run`,
         ...opts,
       });
     },
